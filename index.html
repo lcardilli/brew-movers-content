@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Brew Movers — Content Ideas Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #ffffff;
+      color: #1a1a1a;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      background: #1a2332;
+      padding: 14px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-shrink: 0;
+    }
+
+    .logo { height: 38px; display: block; }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .week-badge {
+      background: rgba(245, 163, 26, 0.15);
+      color: #F5A31A;
+      border: 1px solid rgba(245, 163, 26, 0.35);
+      padding: 5px 14px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+    }
+
+    .btn-generate {
+      background: #F5A31A;
+      color: #1a2332;
+      border: none;
+      padding: 9px 20px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      letter-spacing: 0.01em;
+      transition: background 0.15s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .btn-generate:hover:not(:disabled) { background: #e6960f; transform: translateY(-1px); }
+    .btn-generate:active:not(:disabled) { transform: translateY(0); }
+    .btn-generate:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    /* ── Main ── */
+    main {
+      flex: 1;
+      max-width: 1280px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 36px 32px 48px;
+    }
+
+    .page-header { margin-bottom: 28px; }
+    .page-header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 5px;
+    }
+    .page-header p {
+      font-size: 13.5px;
+      color: #6b7280;
+    }
+
+    /* ── Filter bar ── */
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 7px 18px;
+      border: 1.5px solid #e2e8f0;
+      background: #fff;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      color: #4b5563;
+      transition: all 0.15s;
+    }
+    .filter-btn:hover { border-color: #F5A31A; color: #c07a00; }
+    .filter-btn.active {
+      background: #1a2332;
+      color: #fff;
+      border-color: #1a2332;
+    }
+
+    .filter-counts { font-size: 11px; opacity: 0.75; margin-left: 3px; }
+
+    /* ── Grid ── */
+    .ideas-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 20px;
+      align-items: start;
+    }
+
+    /* ── Card ── */
+    .idea-card {
+      border: 1.5px solid #e8edf2;
+      border-radius: 14px;
+      padding: 22px;
+      background: #fff;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      transition: opacity 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .idea-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+    .idea-card.is-rejected { opacity: 0.45; }
+    .idea-card.is-approved { border-color: #bbf7d0; }
+
+    .card-title {
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.45;
+      color: #1a1a1a;
+      margin-bottom: 13px;
+    }
+
+    /* Pills row */
+    .card-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin-bottom: 13px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .pill-keyword { background: #eff6ff; color: #1d4ed8; }
+    .pill-volume  { background: #fff7ed; color: #c2410c; }
+    .pill-words   { background: #f0fdf4; color: #166534; }
+
+    .card-angle {
+      font-size: 13px;
+      color: #374151;
+      line-height: 1.65;
+      margin-bottom: 11px;
+    }
+
+    .card-meta {
+      font-size: 11.5px;
+      color: #9ca3af;
+      margin-bottom: 4px;
+    }
+    .card-meta span { font-weight: 500; color: #6b7280; }
+
+    .card-date {
+      font-size: 11px;
+      color: #c4c9d4;
+      margin-bottom: 16px;
+    }
+
+    /* Status badge */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 0;
+      width: fit-content;
+    }
+    .status-badge.approved { background: #dcfce7; color: #15803d; }
+    .status-badge.rejected { background: #f3f4f6; color: #9ca3af; }
+
+    /* Card actions */
+    .card-actions {
+      border-top: 1px solid #f1f5f9;
+      padding-top: 15px;
+      margin-top: 15px;
+    }
+
+    .reviewer-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 11px;
+    }
+    .reviewer-label { font-size: 11.5px; color: #9ca3af; font-weight: 500; }
+
+    .reviewer-pill {
+      padding: 4px 14px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 2px solid #e2e8f0;
+      background: #fff;
+      color: #6b7280;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.15s;
+      letter-spacing: 0.03em;
+    }
+    .reviewer-pill:hover { border-color: #F5A31A; color: #b8770a; }
+    .reviewer-pill.selected {
+      border-color: #F5A31A;
+      background: #fffbeb;
+      color: #92600a;
+    }
+
+    .action-btns {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-action {
+      flex: 1;
+      padding: 9px 8px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.15s;
+    }
+    .btn-approve { background: #22c55e; color: #fff; }
+    .btn-approve:hover:not(:disabled) { background: #16a34a; }
+    .btn-reject { background: #ef4444; color: #fff; }
+    .btn-reject:hover:not(:disabled) { background: #dc2626; }
+    .btn-action:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── States ── */
+    .state-message {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 72px 24px;
+      color: #9ca3af;
+      font-size: 15px;
+    }
+    .state-message.error { color: #ef4444; }
+    .state-message .icon { font-size: 36px; display: block; margin-bottom: 14px; }
+
+    /* ── Footer ── */
+    footer {
+      background: #1a2332;
+      padding: 18px 32px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    footer p { color: #4b5563; font-size: 11.5px; letter-spacing: 0.02em; }
+
+    /* ── Generating overlay ── */
+    #overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.75);
+      z-index: 200;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 18px;
+      backdrop-filter: blur(3px);
+    }
+    #overlay.visible { display: flex; }
+    #overlay p { color: #f1f5f9; font-size: 15px; font-weight: 500; }
+
+    .spinner {
+      width: 44px; height: 44px;
+      border: 3px solid rgba(245,163,26,0.25);
+      border-top-color: #F5A31A;
+      border-radius: 50%;
+      animation: spin 0.75s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 640px) {
+      header { padding: 12px 16px; }
+      main { padding: 24px 16px 40px; }
+      .ideas-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <img
+    src="https://brewmovers.com/wp-content/uploads/2022/05/Logo.svg"
+    alt="Brew Movers"
+    class="logo"
+    onerror="this.style.display='none'"
+  />
+  <div class="header-right">
+    <span class="week-badge" id="week-badge">— new this week</span>
+    <button class="btn-generate" id="btn-generate" onclick="generateIdeas()">
+      Generate New Ideas
+    </button>
+  </div>
+</header>
+
+<main>
+  <div class="page-header">
+    <h1>Content Ideas Dashboard</h1>
+    <p>SEO-driven blog content for Brew Movers — powered by Ahrefs keyword research + Claude AI</p>
+  </div>
+
+  <div class="filter-bar" id="filter-bar">
+    <button class="filter-btn active" data-filter="all" onclick="setFilter('all', this)">
+      All <span class="filter-counts" id="count-all"></span>
+    </button>
+    <button class="filter-btn" data-filter="pending" onclick="setFilter('pending', this)">
+      Pending <span class="filter-counts" id="count-pending"></span>
+    </button>
+    <button class="filter-btn" data-filter="approved" onclick="setFilter('approved', this)">
+      Approved <span class="filter-counts" id="count-approved"></span>
+    </button>
+    <button class="filter-btn" data-filter="rejected" onclick="setFilter('rejected', this)">
+      Rejected <span class="filter-counts" id="count-rejected"></span>
+    </button>
+  </div>
+
+  <div class="ideas-grid" id="grid">
+    <div class="state-message">
+      <span class="icon">⏳</span>
+      Loading ideas...
+    </div>
+  </div>
+</main>
+
+<footer>
+  <p>Marketing Powered by The Influence Agency</p>
+</footer>
+
+<div id="overlay">
+  <div class="spinner"></div>
+  <p>Generating new content ideas — this may take up to a minute...</p>
+</div>
+
+<script>
+  let allIdeas = [];
+  let currentFilter = 'all';
+  // Track selected reviewer per idea card (keyed by idea.id)
+  const selectedReviewers = {};
+
+  // ── Data loading ──────────────────────────────────────────────────────────
+
+  async function loadIdeas() {
+    try {
+      const res = await fetch('/api/ideas');
+      if (!res.ok) throw new Error(`Server returned ${res.status}`);
+      allIdeas = await res.json();
+      render();
+    } catch (err) {
+      document.getElementById('grid').innerHTML =
+        `<div class="state-message error"><span class="icon">⚠️</span>Failed to load ideas: ${esc(err.message)}</div>`;
+    }
+  }
+
+  // ── Rendering ─────────────────────────────────────────────────────────────
+
+  function render() {
+    updateCounts();
+    updateWeekBadge();
+
+    const filtered =
+      currentFilter === 'all'
+        ? allIdeas
+        : allIdeas.filter(i => i.status === currentFilter);
+
+    if (filtered.length === 0) {
+      const msg =
+        allIdeas.length === 0
+          ? '<span class="icon">💡</span>No ideas yet — click <strong>Generate New Ideas</strong> to get started.'
+          : `<span class="icon">🔍</span>No ${currentFilter} ideas found.`;
+      document.getElementById('grid').innerHTML = `<div class="state-message">${msg}</div>`;
+      return;
+    }
+
+    // Render newest first
+    const sorted = [...filtered].sort((a, b) => new Date(b.generatedDate) - new Date(a.generatedDate));
+    document.getElementById('grid').innerHTML = sorted.map(cardHTML).join('');
+  }
+
+  function updateCounts() {
+    const all      = allIdeas.length;
+    const pending  = allIdeas.filter(i => i.status === 'pending').length;
+    const approved = allIdeas.filter(i => i.status === 'approved').length;
+    const rejected = allIdeas.filter(i => i.status === 'rejected').length;
+
+    document.getElementById('count-all').textContent      = all      ? `(${all})`      : '';
+    document.getElementById('count-pending').textContent  = pending  ? `(${pending})`  : '';
+    document.getElementById('count-approved').textContent = approved ? `(${approved})` : '';
+    document.getElementById('count-rejected').textContent = rejected ? `(${rejected})` : '';
+  }
+
+  function updateWeekBadge() {
+    const cutoff = new Date();
+    cutoff.setDate(cutoff.getDate() - 7);
+    const n = allIdeas.filter(i => new Date(i.generatedDate) >= cutoff).length;
+    document.getElementById('week-badge').textContent = `${n} new this week`;
+  }
+
+  function cardHTML(idea) {
+    const isPending  = idea.status === 'pending';
+    const isApproved = idea.status === 'approved';
+    const isRejected = idea.status === 'rejected';
+    const reviewer   = selectedReviewers[idea.id] || '';
+
+    const date = new Date(idea.generatedDate).toLocaleDateString('en-US', {
+      month: 'short', day: 'numeric', year: 'numeric'
+    });
+
+    const statusBadge = !isPending
+      ? `<div class="status-badge ${idea.status}">
+           ${isApproved ? '✓ Approved' : '✗ Rejected'} by ${esc(idea.reviewer)}
+         </div>`
+      : '';
+
+    const actions = isPending
+      ? `<div class="card-actions">
+           <div class="reviewer-row">
+             <span class="reviewer-label">Reviewer:</span>
+             <button class="reviewer-pill ${reviewer === 'AG' ? 'selected' : ''}"
+               onclick="selectReviewer('${esc(idea.id)}', 'AG')">AG</button>
+             <button class="reviewer-pill ${reviewer === 'BA' ? 'selected' : ''}"
+               onclick="selectReviewer('${esc(idea.id)}', 'BA')">BA</button>
+           </div>
+           <div class="action-btns">
+             <button class="btn-action btn-approve" ${!reviewer ? 'disabled' : ''}
+               onclick="updateStatus('${esc(idea.id)}', 'approved')">Approve</button>
+             <button class="btn-action btn-reject" ${!reviewer ? 'disabled' : ''}
+               onclick="updateStatus('${esc(idea.id)}', 'rejected')">Reject</button>
+           </div>
+         </div>`
+      : '';
+
+    return `
+      <div class="idea-card ${isRejected ? 'is-rejected' : ''} ${isApproved ? 'is-approved' : ''}"
+           id="card-${esc(idea.id)}">
+        <div class="card-title">${esc(idea.title)}</div>
+        <div class="card-pills">
+          <span class="pill pill-keyword">&#128273; ${esc(idea.targetKeyword)}</span>
+          <span class="pill pill-volume">&#128200; ${Number(idea.searchVolume || 0).toLocaleString()}/mo</span>
+          <span class="pill pill-words">&#128221; ${Number(idea.suggestedWordCount || 0).toLocaleString()} words</span>
+        </div>
+        <p class="card-angle">${esc(idea.contentAngle)}</p>
+        <p class="card-meta">Source: <span>${esc(idea.source)}</span></p>
+        <p class="card-date">Generated ${date}</p>
+        ${statusBadge}
+        ${actions}
+      </div>`;
+  }
+
+  // ── Interactions ──────────────────────────────────────────────────────────
+
+  function setFilter(filter, btn) {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  }
+
+  function selectReviewer(ideaId, reviewer) {
+    selectedReviewers[ideaId] = reviewer;
+    render();
+  }
+
+  async function updateStatus(ideaId, status) {
+    const reviewer = selectedReviewers[ideaId];
+    if (!reviewer) {
+      alert('Please select a reviewer (AG or BA) before approving or rejecting.');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: ideaId, status, reviewer })
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || `Server returned ${res.status}`);
+      }
+
+      const idea = allIdeas.find(i => i.id === ideaId);
+      if (idea) {
+        idea.status = status;
+        idea.reviewer = reviewer;
+      }
+      render();
+    } catch (err) {
+      alert(`Failed to save: ${err.message}`);
+    }
+  }
+
+  async function generateIdeas() {
+    const overlay = document.getElementById('overlay');
+    const btn     = document.getElementById('btn-generate');
+
+    overlay.classList.add('visible');
+    btn.disabled = true;
+
+    try {
+      const res = await fetch('/api/generate', { method: 'POST' });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error || `Server returned ${res.status}`);
+      }
+      await loadIdeas();
+    } catch (err) {
+      alert(`Generation failed: ${err.message}`);
+    } finally {
+      overlay.classList.remove('visible');
+      btn.disabled = false;
+    }
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
+
+  function esc(str) {
+    if (str == null) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  loadIdeas();
+</script>
+</body>
+</html>

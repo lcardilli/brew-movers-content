@@ -1,0 +1,19 @@
+{
+  "functions": {
+    "api/generate.js": {
+      "maxDuration": 300
+    },
+    "api/save.js": {
+      "maxDuration": 30
+    },
+    "api/ideas.js": {
+      "maxDuration": 30
+    }
+  },
+  "crons": [
+    {
+      "path": "/api/generate",
+      "schedule": "0 13 * * 1"
+    }
+  ]
+}
