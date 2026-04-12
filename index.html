@@ -170,8 +170,10 @@
       white-space: nowrap;
     }
     .pill-keyword { background: #eff6ff; color: #1d4ed8; }
-    .pill-volume  { background: #fff7ed; color: #c2410c; }
     .pill-words   { background: #f0fdf4; color: #166534; }
+    .pill-intent-informational { background: #f0f9ff; color: #0369a1; }
+    .pill-intent-commercial    { background: #fff7ed; color: #c2410c; }
+    .pill-intent-navigational  { background: #fdf4ff; color: #7e22ce; }
 
     .card-angle {
       font-size: 13px;
@@ -476,7 +478,7 @@
         <div class="card-title">${esc(idea.title)}</div>
         <div class="card-pills">
           <span class="pill pill-keyword">&#128273; ${esc(idea.targetKeyword)}</span>
-          <span class="pill pill-volume">&#128200; ${Number(idea.searchVolume || 0).toLocaleString()}/mo</span>
+          <span class="pill pill-intent-${esc((idea.searchIntent || 'informational').toLowerCase())}">${intentLabel(idea.searchIntent)}</span>
           <span class="pill pill-words">&#128221; ${Number(idea.suggestedWordCount || 0).toLocaleString()} words</span>
         </div>
         <p class="card-angle">${esc(idea.contentAngle)}</p>
@@ -553,6 +555,12 @@
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
+
+  const INTENT_ICONS = { informational: '📖', commercial: '🛒', navigational: '🧭' };
+  function intentLabel(intent) {
+    const i = (intent || 'informational').toLowerCase();
+    return `${INTENT_ICONS[i] || '📖'} ${i.charAt(0).toUpperCase() + i.slice(1)}`;
+  }
 
   function esc(str) {
     if (str == null) return '';

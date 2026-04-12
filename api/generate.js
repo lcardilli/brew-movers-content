@@ -1,7 +1,6 @@
 'use strict';
 
-const { fetchKeywordIdeas } = require('../lib/semrush');
-const { fetchIndustryNews, generateContentIdeas } = require('../lib/anthropic-utils');
+const { fetchIndustryNews, fetchKeywordResearch, generateContentIdeas } = require('../lib/anthropic-utils');
 const { readIdeas, writeIdeas } = require('../lib/storage');
 
 module.exports = async (req, res) => {
@@ -18,7 +17,6 @@ module.exports = async (req, res) => {
     }
   }
 
-  const semrushKey = process.env.SEMRUSH_API_KEY;
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
 
   if (!anthropicKey) {
@@ -26,14 +24,14 @@ module.exports = async (req, res) => {
   }
 
   try {
-    console.log('[generate] Fetching SEMrush keywords...');
-    const keywords = await fetchKeywordIdeas(semrushKey || '');
-
-    console.log('[generate] Researching industry news...');
+    console.log('[generate] Searching for current industry news...');
     const news = await fetchIndustryNews(anthropicKey);
 
+    console.log('[generate] Searching for keyword trends and questions...');
+    const keywordResearch = await fetchKeywordResearch(anthropicKey);
+
     console.log('[generate] Generating content ideas...');
-    const rawIdeas = await generateContentIdeas(anthropicKey, keywords, news);
+    const rawIdeas = await generateContentIdeas(anthropicKey, news, keywordResearch);
 
     const existing = await readIdeas();
     const today = new Date().toISOString().split('T')[0];
@@ -42,7 +40,7 @@ module.exports = async (req, res) => {
       id: crypto.randomUUID(),
       title: idea.title,
       targetKeyword: idea.targetKeyword,
-      searchVolume: Number(idea.searchVolume) || 0,
+      searchIntent: idea.searchIntent || 'informational',
       contentAngle: idea.contentAngle,
       suggestedWordCount: Number(idea.suggestedWordCount) || 1200,
       source: idea.source,
