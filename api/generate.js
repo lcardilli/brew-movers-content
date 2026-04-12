@@ -1,6 +1,6 @@
 'use strict';
 
-const { fetchKeywordIdeas } = require('../lib/ahrefs');
+const { fetchKeywordIdeas } = require('../lib/semrush');
 const { fetchIndustryNews, generateContentIdeas } = require('../lib/anthropic-utils');
 const { readIdeas, writeIdeas } = require('../lib/storage');
 
@@ -18,7 +18,7 @@ module.exports = async (req, res) => {
     }
   }
 
-  const ahrefsToken = process.env.AHREFS_TOKEN;
+  const semrushKey = process.env.SEMRUSH_API_KEY;
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
 
   if (!anthropicKey) {
@@ -26,8 +26,8 @@ module.exports = async (req, res) => {
   }
 
   try {
-    console.log('[generate] Fetching Ahrefs keywords...');
-    const keywords = await fetchKeywordIdeas(ahrefsToken || '');
+    console.log('[generate] Fetching SEMrush keywords...');
+    const keywords = await fetchKeywordIdeas(semrushKey || '');
 
     console.log('[generate] Researching industry news...');
     const news = await fetchIndustryNews(anthropicKey);

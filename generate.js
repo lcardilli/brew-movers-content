@@ -2,26 +2,26 @@
 
 require('dotenv').config();
 
-const { fetchKeywordIdeas } = require('./lib/ahrefs');
+const { fetchKeywordIdeas } = require('./lib/semrush');
 const { fetchIndustryNews, generateContentIdeas } = require('./lib/anthropic-utils');
 const { readIdeas, writeIdeas } = require('./lib/storage');
 
 async function main() {
   console.log('=== Brew Movers Content Idea Generator ===\n');
 
-  const ahrefsToken = process.env.AHREFS_TOKEN;
+  const semrushKey = process.env.SEMRUSH_API_KEY;
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
 
   if (!anthropicKey) {
     throw new Error('Missing ANTHROPIC_API_KEY in .env');
   }
-  if (!ahrefsToken) {
-    console.warn('AHREFS_TOKEN not set — will use fallback keyword data\n');
+  if (!semrushKey) {
+    console.warn('SEMRUSH_API_KEY not set — will use fallback keyword data\n');
   }
 
-  // Step 1: Fetch keyword ideas from Ahrefs
-  console.log('1/3 Fetching keyword ideas from Ahrefs...');
-  const keywords = await fetchKeywordIdeas(ahrefsToken || '');
+  // Step 1: Fetch keyword ideas from SEMrush
+  console.log('1/3 Fetching keyword ideas from SEMrush...');
+  const keywords = await fetchKeywordIdeas(semrushKey || '');
   console.log(`    Found ${keywords.length} keywords (top: "${keywords[0]?.keyword}")\n`);
 
   // Step 2: Research current industry news via Claude web search
