@@ -23,12 +23,20 @@ module.exports = async (req, res) => {
     return res.status(500).json({ error: 'ANTHROPIC_API_KEY environment variable is not set.' });
   }
 
+  const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
   try {
     console.log('[generate] Searching for current industry news...');
     const news = await fetchIndustryNews(anthropicKey);
 
+    console.log('[generate] Waiting before next request...');
+    await sleep(15000);
+
     console.log('[generate] Searching for keyword trends and questions...');
     const keywordResearch = await fetchKeywordResearch(anthropicKey);
+
+    console.log('[generate] Waiting before next request...');
+    await sleep(15000);
 
     console.log('[generate] Generating content ideas...');
     const rawIdeas = await generateContentIdeas(anthropicKey, news, keywordResearch);
