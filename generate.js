@@ -2,7 +2,7 @@
 
 require('dotenv').config();
 
-const { fetchIndustryNews, fetchKeywordResearch, generateContentIdeas } = require('./lib/anthropic-utils');
+const { generateContentIdeas } = require('./lib/anthropic-utils');
 const { readIdeas, writeIdeas } = require('./lib/storage');
 
 async function main() {
@@ -14,19 +14,8 @@ async function main() {
     throw new Error('Missing ANTHROPIC_API_KEY in .env');
   }
 
-  // Step 1: Search for current industry news
-  console.log('1/3 Searching for current beverage logistics news...');
-  const news = await fetchIndustryNews(anthropicKey);
-  console.log('    News research complete\n');
-
-  // Step 2: Search for commonly searched keywords and questions
-  console.log('2/3 Searching for keyword trends and questions in the space...');
-  const keywordResearch = await fetchKeywordResearch(anthropicKey);
-  console.log('    Keyword research complete\n');
-
-  // Step 3: Generate 10 SEO-driven content ideas
-  console.log('3/3 Generating content ideas with Claude...');
-  const rawIdeas = await generateContentIdeas(anthropicKey, news, keywordResearch);
+  console.log('Generating content ideas with Claude...');
+  const rawIdeas = await generateContentIdeas(anthropicKey);
   console.log(`    Generated ${rawIdeas.length} ideas\n`);
 
   // Load existing ideas and append new ones with metadata
