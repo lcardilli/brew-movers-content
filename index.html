@@ -119,12 +119,34 @@
 
     .filter-counts { font-size: 11px; opacity: 0.75; margin-left: 3px; }
 
+    /* ── Type filter row ── */
+    .filter-bar-type {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+    .filter-btn-type {
+      padding: 5px 14px;
+      border: 1.5px solid #e2e8f0;
+      background: #fff;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      color: #4b5563;
+      transition: all 0.15s;
+    }
+    .filter-btn-type:hover { border-color: #F5A31A; color: #c07a00; }
+    .filter-btn-type.active { background: #1a2332; color: #fff; border-color: #1a2332; }
+
     /* ── Grid ── */
     .ideas-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
       gap: 20px;
-      align-items: start;
+      align-items: stretch;
     }
 
     /* ── Card ── */
@@ -358,6 +380,15 @@
     </button>
   </div>
 
+  <div class="filter-bar-type" id="filter-bar-type">
+    <button class="filter-btn-type active" onclick="setTypeFilter('all', this)">All Types</button>
+    <button class="filter-btn-type" onclick="setTypeFilter('blog', this)">✍️ Blog</button>
+    <button class="filter-btn-type" onclick="setTypeFilter('service-page', this)">⚙️ Service Page</button>
+    <button class="filter-btn-type" onclick="setTypeFilter('pillar-guide', this)">📚 Pillar Guide</button>
+    <button class="filter-btn-type" onclick="setTypeFilter('landing-page', this)">🎯 Landing Page</button>
+    <button class="filter-btn-type" onclick="setTypeFilter('location-page', this)">📍 Location Page</button>
+  </div>
+
   <div class="ideas-grid" id="grid">
     <div class="state-message">
       <span class="icon">⏳</span>
@@ -378,7 +409,7 @@
 <script>
   let allIdeas = [];
   let currentFilter = 'all';
-  // Track selected reviewer per idea card (keyed by idea.id)
+  let currentTypeFilter = 'all';
   const selectedReviewers = {};
 
   // ── Data loading ──────────────────────────────────────────────────────────
@@ -401,16 +432,14 @@
     updateCounts();
     updateWeekBadge();
 
-    const filtered =
-      currentFilter === 'all'
-        ? allIdeas
-        : allIdeas.filter(i => i.status === currentFilter);
+    let filtered = currentFilter === 'all' ? allIdeas : allIdeas.filter(i => i.status === currentFilter);
+    if (currentTypeFilter !== 'all') filtered = filtered.filter(i => (i.contentType || 'blog') === currentTypeFilter);
 
     if (filtered.length === 0) {
       const msg =
         allIdeas.length === 0
           ? '<span class="icon">💡</span>No ideas yet — click <strong>Generate New Ideas</strong> to get started.'
-          : `<span class="icon">🔍</span>No ${currentFilter} ideas found.`;
+          : `<span class="icon">🔍</span>No matching ideas found.`;
       document.getElementById('grid').innerHTML = `<div class="state-message">${msg}</div>`;
       return;
     }
@@ -496,6 +525,13 @@
   function setFilter(filter, btn) {
     currentFilter = filter;
     document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render();
+  }
+
+  function setTypeFilter(type, btn) {
+    currentTypeFilter = type;
+    document.querySelectorAll('.filter-btn-type').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     render();
   }
