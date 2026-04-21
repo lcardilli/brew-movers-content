@@ -14,8 +14,10 @@ async function main() {
     throw new Error('Missing ANTHROPIC_API_KEY in .env');
   }
 
+  const semrushKey = process.env.SEMRUSH_API_KEY || null;
+  console.log(`SEMrush: ${semrushKey ? 'enabled' : 'not configured — using RSS only'}`);
   console.log('Generating content ideas with Claude...');
-  const rawIdeas = await generateContentIdeas(anthropicKey);
+  const rawIdeas = await generateContentIdeas(anthropicKey, semrushKey);
   console.log(`    Generated ${rawIdeas.length} ideas\n`);
 
   // Load existing ideas and append new ones with metadata

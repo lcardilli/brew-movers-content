@@ -18,6 +18,7 @@ module.exports = async (req, res) => {
   }
 
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
+  const semrushKey = process.env.SEMRUSH_API_KEY || null;
 
   if (!anthropicKey) {
     return res.status(500).json({ error: 'ANTHROPIC_API_KEY environment variable is not set.' });
@@ -25,7 +26,8 @@ module.exports = async (req, res) => {
 
   try {
     console.log('[generate] Generating content ideas...');
-    const rawIdeas = await generateContentIdeas(anthropicKey);
+    console.log(`[generate] SEMrush: ${semrushKey ? 'enabled' : 'not configured — using RSS only'}`);
+    const rawIdeas = await generateContentIdeas(anthropicKey, semrushKey);
 
     const existing = await readIdeas();
     const today = new Date().toISOString().split('T')[0];
