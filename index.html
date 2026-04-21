@@ -571,6 +571,9 @@
   }
 
   async function generateIdeas() {
+    const password = prompt('Enter password to generate ideas:');
+    if (!password) return;
+
     const overlay = document.getElementById('overlay');
     const btn     = document.getElementById('btn-generate');
 
@@ -578,7 +581,11 @@
     btn.disabled = true;
 
     try {
-      const res = await fetch('/api/generate', { method: 'POST' });
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
         throw new Error(body.error || `Server returned ${res.status}`);

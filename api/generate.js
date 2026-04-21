@@ -17,6 +17,14 @@ module.exports = async (req, res) => {
     }
   }
 
+  // Password protect manual POST requests
+  if (req.method === 'POST' && process.env.GENERATE_PASSWORD) {
+    const { password } = req.body || {};
+    if (password !== process.env.GENERATE_PASSWORD) {
+      return res.status(401).json({ error: 'Incorrect password.' });
+    }
+  }
+
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
   const semrushKey = process.env.SEMRUSH_API_KEY || null;
 
