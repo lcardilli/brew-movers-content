@@ -197,6 +197,7 @@
     .pill-intent-commercial    { background: #fff7ed; color: #c2410c; }
     .pill-intent-navigational  { background: #fdf4ff; color: #7e22ce; }
     .pill-type                 { background: #f0fdf4; color: #15803d; }
+    .pill-urgent               { background: #fef2f2; color: #dc2626; font-weight: 600; }
 
     .card-angle {
       font-size: 13px;
@@ -387,6 +388,7 @@
     <button class="filter-btn-type" onclick="setTypeFilter('pillar-guide', this)">📚 Pillar Guide</button>
     <button class="filter-btn-type" onclick="setTypeFilter('landing-page', this)">🎯 Landing Page</button>
     <button class="filter-btn-type" onclick="setTypeFilter('location-page', this)">📍 Location Page</button>
+    <button class="filter-btn-type" onclick="setTypeFilter('urgent', this)">⚡ Urgent</button>
   </div>
 
   <div class="ideas-grid" id="grid">
@@ -433,7 +435,8 @@
     updateWeekBadge();
 
     let filtered = currentFilter === 'all' ? allIdeas : allIdeas.filter(i => i.status === currentFilter);
-    if (currentTypeFilter !== 'all') filtered = filtered.filter(i => (i.contentType || 'blog') === currentTypeFilter);
+    if (currentTypeFilter === 'urgent') filtered = filtered.filter(i => i.urgent === true);
+    else if (currentTypeFilter !== 'all') filtered = filtered.filter(i => (i.contentType || 'blog') === currentTypeFilter);
 
     if (filtered.length === 0) {
       const msg =
@@ -511,6 +514,7 @@
           <span class="pill pill-intent-${esc((idea.searchIntent || 'informational').toLowerCase())}">${intentLabel(idea.searchIntent)}</span>
           <span class="pill pill-type">${contentTypeLabel(idea.contentType)}</span>
           <span class="pill pill-words">&#128221; ${Number(idea.suggestedWordCount || 0).toLocaleString()} words</span>
+          ${idea.urgent ? '<span class="pill pill-urgent">⚡ Publish ASAP</span>' : ''}
         </div>
         <p class="card-angle">${esc(idea.contentAngle)}</p>
         <p class="card-meta">Source: <span>${esc(idea.source)}</span></p>

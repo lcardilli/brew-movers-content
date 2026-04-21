@@ -48,6 +48,7 @@ module.exports = async (req, res) => {
       contentAngle: idea.contentAngle,
       suggestedWordCount: Number(idea.suggestedWordCount) || 1200,
       source: idea.source,
+      urgent: idea.urgent === true,
       generatedDate: today,
       status: 'pending',
       reviewer: null
