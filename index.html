@@ -174,6 +174,7 @@
     .pill-intent-informational { background: #f0f9ff; color: #0369a1; }
     .pill-intent-commercial    { background: #fff7ed; color: #c2410c; }
     .pill-intent-navigational  { background: #fdf4ff; color: #7e22ce; }
+    .pill-type                 { background: #f0fdf4; color: #15803d; }
 
     .card-angle {
       font-size: 13px;
@@ -479,6 +480,7 @@
         <div class="card-pills">
           <span class="pill pill-keyword">&#128273; ${esc(idea.targetKeyword)}</span>
           <span class="pill pill-intent-${esc((idea.searchIntent || 'informational').toLowerCase())}">${intentLabel(idea.searchIntent)}</span>
+          <span class="pill pill-type">${contentTypeLabel(idea.contentType)}</span>
           <span class="pill pill-words">&#128221; ${Number(idea.suggestedWordCount || 0).toLocaleString()} words</span>
         </div>
         <p class="card-angle">${esc(idea.contentAngle)}</p>
@@ -560,6 +562,13 @@
   function intentLabel(intent) {
     const i = (intent || 'informational').toLowerCase();
     return `${INTENT_ICONS[i] || '📖'} ${i.charAt(0).toUpperCase() + i.slice(1)}`;
+  }
+
+  const TYPE_ICONS = { 'blog': '✍️', 'service-page': '⚙️', 'pillar-guide': '📚', 'landing-page': '🎯', 'location-page': '📍' };
+  const TYPE_LABELS = { 'blog': 'Blog', 'service-page': 'Service Page', 'pillar-guide': 'Pillar Guide', 'landing-page': 'Landing Page', 'location-page': 'Location Page' };
+  function contentTypeLabel(type) {
+    const t = type || 'blog';
+    return `${TYPE_ICONS[t] || '✍️'} ${TYPE_LABELS[t] || 'Blog'}`;
   }
 
   function esc(str) {

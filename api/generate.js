@@ -27,14 +27,14 @@ module.exports = async (req, res) => {
   try {
     console.log('[generate] Generating content ideas...');
     console.log(`[generate] SEMrush: ${semrushKey ? 'enabled' : 'not configured — using RSS only'}`);
-    const rawIdeas = await generateContentIdeas(anthropicKey, semrushKey);
-
     const existing = await readIdeas();
+    const rawIdeas = await generateContentIdeas(anthropicKey, semrushKey, existing);
     const today = new Date().toISOString().split('T')[0];
 
     const newIdeas = rawIdeas.map(idea => ({
       id: crypto.randomUUID(),
       title: idea.title,
+      contentType: idea.contentType || 'blog',
       targetKeyword: idea.targetKeyword,
       searchIntent: idea.searchIntent || 'informational',
       contentAngle: idea.contentAngle,
