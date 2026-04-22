@@ -390,6 +390,7 @@
     <button class="filter-btn-type" onclick="setTypeFilter('landing-page', this)">🎯 Landing Page</button>
     <button class="filter-btn-type" onclick="setTypeFilter('location-page', this)">📍 Location Page</button>
     <button class="filter-btn-type" onclick="setTypeFilter('comparison-page', this)">⚖️ Comparison</button>
+    <button class="filter-btn-type" onclick="setTypeFilter('page-optimization', this)">🔧 Optimization</button>
     <button class="filter-btn-type" onclick="setTypeFilter('urgent', this)">⚡ Urgent</button>
   </div>
 
@@ -613,8 +614,8 @@
     return `${INTENT_ICONS[i] || '📖'} ${i.charAt(0).toUpperCase() + i.slice(1)}`;
   }
 
-  const TYPE_ICONS = { 'blog': '✍️', 'service-page': '⚙️', 'pillar-guide': '📚', 'landing-page': '🎯', 'location-page': '📍', 'comparison-page': '⚖️' };
-  const TYPE_LABELS = { 'blog': 'Blog', 'service-page': 'Service Page', 'pillar-guide': 'Pillar Guide', 'landing-page': 'Landing Page', 'location-page': 'Location Page', 'comparison-page': 'Comparison' };
+  const TYPE_ICONS = { 'blog': '✍️', 'service-page': '⚙️', 'pillar-guide': '📚', 'landing-page': '🎯', 'location-page': '📍', 'comparison-page': '⚖️', 'page-optimization': '🔧' };
+  const TYPE_LABELS = { 'blog': 'Blog', 'service-page': 'Service Page', 'pillar-guide': 'Pillar Guide', 'landing-page': 'Landing Page', 'location-page': 'Location Page', 'comparison-page': 'Comparison', 'page-optimization': 'Page Optimization' };
   function contentTypeLabel(type) {
     const t = type || 'blog';
     return `${TYPE_ICONS[t] || '✍️'} ${TYPE_LABELS[t] || 'Blog'}`;
