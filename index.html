@@ -986,11 +986,12 @@
         <div class="pulse-tile-vol">${Number(v.volume).toLocaleString()}<span style="font-size:10px;font-weight:500;color:#9ca3af;"> /mo</span></div>
         <div class="pulse-tile-trend ${v.direction}">${trendArrow(v.direction, v.trendPct)}</div>
         ${v.prevVolume != null && v.prevDate ? `<div class="pulse-tile-prev">vs ${Number(v.prevVolume).toLocaleString()} · ${new Date(v.prevDate).toLocaleDateString('en-US',{month:'short',year:'numeric'})}</div>` : ''}
-        ${v.intentVolume != null ? (() => {
-          const rate = v.volume > 0 ? ((v.intentVolume / v.volume) * 100).toFixed(2) : null;
-          const label = `${Number(v.intentVolume).toLocaleString()} logistics searches/mo${rate !== null ? ` · ${rate}% of category` : ''}`;
+        ${(() => {
+          const iv   = v.intentVolume ?? 0;
+          const rate = v.volume > 0 ? ((iv / v.volume) * 100).toFixed(2) : '0.00';
+          const label = `${Number(iv).toLocaleString()} logistics searches/mo · ${rate}% of category`;
           return `<div class="pulse-tile-intent"><div class="pulse-tile-intent-dot"></div>${label}</div>`;
-        })() : ''}
+        })()}
       </div>`).join('');
 
     if (data.cachedAt) {
