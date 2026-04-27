@@ -10,7 +10,7 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { id, status, reviewer } = req.body || {};
+  const { id, status, reviewer, note } = req.body || {};
 
   if (!id || !status || !reviewer) {
     return res.status(400).json({ error: 'Missing required fields: id, status, reviewer' });
@@ -34,6 +34,7 @@ module.exports = async (req, res) => {
       ...ideas[idx],
       status,
       reviewer,
+      note: (typeof note === 'string' && note.trim()) ? note.trim() : (ideas[idx].note || null),
       updatedAt: new Date().toISOString()
     };
 

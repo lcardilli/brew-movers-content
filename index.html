@@ -292,6 +292,89 @@
     .btn-reject:hover:not(:disabled) { background: #dc2626; }
     .btn-action:disabled { opacity: 0.4; cursor: not-allowed; }
 
+    /* ── Note confirmation zone ── */
+    .confirm-zone {
+      margin-top: 12px;
+    }
+    .confirm-label {
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .confirm-label.approving { color: #16a34a; }
+    .confirm-label.rejecting { color: #dc2626; }
+    .note-textarea {
+      width: 100%;
+      min-height: 72px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      color: #1a1a1a;
+      resize: vertical;
+      outline: none;
+      transition: border-color 0.15s;
+      margin-bottom: 10px;
+    }
+    .note-textarea:focus { border-color: #F5A31A; }
+    .confirm-btns {
+      display: flex;
+      gap: 8px;
+    }
+    .btn-confirm {
+      flex: 1;
+      padding: 9px 8px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.15s;
+      color: #fff;
+    }
+    .btn-confirm.approving { background: #22c55e; }
+    .btn-confirm.approving:hover { background: #16a34a; }
+    .btn-confirm.rejecting { background: #ef4444; }
+    .btn-confirm.rejecting:hover { background: #dc2626; }
+    .btn-cancel {
+      padding: 9px 16px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      background: #fff;
+      color: #6b7280;
+      transition: all 0.15s;
+    }
+    .btn-cancel:hover { border-color: #9ca3af; color: #374151; }
+
+    /* ── Reviewer note display ── */
+    .reviewer-note {
+      margin-top: 10px;
+      background: #f8fafc;
+      border-left: 3px solid #e2e8f0;
+      border-radius: 0 6px 6px 0;
+      padding: 8px 12px;
+      font-size: 12.5px;
+      color: #4b5563;
+      line-height: 1.55;
+    }
+    .reviewer-note-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #9ca3af;
+      margin-bottom: 3px;
+    }
+
     /* ── States ── */
     .state-message {
       grid-column: 1 / -1;
@@ -416,6 +499,7 @@
   let currentFilter = 'all';
   let currentTypeFilter = 'all';
   const selectedReviewers = {};
+  const pendingActions = {}; // { [ideaId]: 'approved' | 'rejected' }
 
   // ── Data loading ──────────────────────────────────────────────────────────
 
@@ -484,14 +568,18 @@
       month: 'short', day: 'numeric', year: 'numeric'
     });
 
+    const pending = pendingActions[idea.id]; // 'approved' | 'rejected' | undefined
+
     const statusBadge = !isPending
       ? `<div class="status-badge ${idea.status}">
            ${isApproved ? '✓ Approved' : '✗ Rejected'} by ${esc(idea.reviewer)}
-         </div>`
+         </div>
+         ${idea.note ? `<div class="reviewer-note"><div class="reviewer-note-label">Note</div>${esc(idea.note)}</div>` : ''}`
       : '';
 
     const actions = isPending
       ? `<div class="card-actions">
+           ${!pending ? `
            <div class="reviewer-row">
              <span class="reviewer-label">Reviewer:</span>
              <button class="reviewer-pill ${reviewer === 'AG' ? 'selected' : ''}"
@@ -501,10 +589,22 @@
            </div>
            <div class="action-btns">
              <button class="btn-action btn-approve" ${!reviewer ? 'disabled' : ''}
-               onclick="updateStatus('${esc(idea.id)}', 'approved')">Approve</button>
+               onclick="startAction('${esc(idea.id)}', 'approved')">Approve</button>
              <button class="btn-action btn-reject" ${!reviewer ? 'disabled' : ''}
-               onclick="updateStatus('${esc(idea.id)}', 'rejected')">Reject</button>
-           </div>
+               onclick="startAction('${esc(idea.id)}', 'rejected')">Reject</button>
+           </div>` : `
+           <div class="confirm-zone">
+             <div class="confirm-label ${pending === 'approved' ? 'approving' : 'rejecting'}">
+               ${pending === 'approved' ? '✓ Approving' : '✗ Rejecting'} — add a note (optional)
+             </div>
+             <textarea class="note-textarea" id="note-${esc(idea.id)}"
+               placeholder="e.g. Great keyword opportunity, prioritise for Q3. Link to brief: …"></textarea>
+             <div class="confirm-btns">
+               <button class="btn-confirm ${pending === 'approved' ? 'approving' : 'rejecting'}"
+                 onclick="confirmAction('${esc(idea.id)}')">Confirm</button>
+               <button class="btn-cancel" onclick="cancelAction('${esc(idea.id)}')">Cancel</button>
+             </div>
+           </div>`}
          </div>`
       : '';
 
@@ -548,18 +648,38 @@
     render();
   }
 
-  async function updateStatus(ideaId, status) {
+  function startAction(ideaId, status) {
     const reviewer = selectedReviewers[ideaId];
     if (!reviewer) {
       alert('Please select a reviewer (AG or BA) before approving or rejecting.');
       return;
     }
+    pendingActions[ideaId] = status;
+    render();
+    // Focus the textarea after render
+    requestAnimationFrame(() => {
+      const ta = document.getElementById(`note-${ideaId}`);
+      if (ta) ta.focus();
+    });
+  }
+
+  function cancelAction(ideaId) {
+    delete pendingActions[ideaId];
+    render();
+  }
+
+  async function confirmAction(ideaId) {
+    const status   = pendingActions[ideaId];
+    const reviewer = selectedReviewers[ideaId];
+    const note     = (document.getElementById(`note-${ideaId}`)?.value || '').trim();
+
+    if (!status || !reviewer) return;
 
     try {
       const res = await fetch('/api/save', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: ideaId, status, reviewer })
+        body: JSON.stringify({ id: ideaId, status, reviewer, note: note || null })
       });
       if (!res.ok) {
         const body = await res.json().catch(() => ({}));
@@ -568,9 +688,11 @@
 
       const idea = allIdeas.find(i => i.id === ideaId);
       if (idea) {
-        idea.status = status;
+        idea.status   = status;
         idea.reviewer = reviewer;
+        idea.note     = note || null;
       }
+      delete pendingActions[ideaId];
       render();
     } catch (err) {
       alert(`Failed to save: ${err.message}`);
