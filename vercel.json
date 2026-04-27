@@ -3,6 +3,9 @@
     "api/generate.js": {
       "maxDuration": 300
     },
+    "api/trends.js": {
+      "maxDuration": 60
+    },
     "api/save.js": {
       "maxDuration": 30
     },

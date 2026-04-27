@@ -420,10 +420,101 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* ── Market Pulse ── */
+    .market-pulse {
+      background: #f8fafc;
+      border: 1.5px solid #e8edf2;
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin-bottom: 28px;
+    }
+    .pulse-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .pulse-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #1a1a1a;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .pulse-title-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #F5A31A;
+      flex-shrink: 0;
+    }
+    .pulse-meta {
+      font-size: 11px;
+      color: #9ca3af;
+    }
+    .pulse-tiles {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+      gap: 10px;
+    }
+    .pulse-tile {
+      background: #fff;
+      border: 1.5px solid #e8edf2;
+      border-radius: 10px;
+      padding: 12px 14px;
+      border-left-width: 3px;
+      min-width: 0;
+    }
+    .pulse-tile.rising   { border-left-color: #22c55e; }
+    .pulse-tile.stable   { border-left-color: #d1d5db; }
+    .pulse-tile.declining{ border-left-color: #ef4444; }
+    .pulse-tile-name {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .pulse-sparkline {
+      margin-bottom: 7px;
+      display: block;
+    }
+    .pulse-sparkline.rising   { color: #22c55e; }
+    .pulse-sparkline.stable   { color: #9ca3af; }
+    .pulse-sparkline.declining{ color: #ef4444; }
+    .pulse-tile-vol {
+      font-size: 12px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 3px;
+    }
+    .pulse-tile-trend {
+      font-size: 11px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+    .pulse-tile-trend.rising   { color: #16a34a; }
+    .pulse-tile-trend.stable   { color: #9ca3af; }
+    .pulse-tile-trend.declining{ color: #dc2626; }
+    .pulse-loading {
+      font-size: 13px;
+      color: #9ca3af;
+      text-align: center;
+      padding: 16px 0;
+    }
+
     @media (max-width: 640px) {
       header { padding: 12px 16px; }
       main { padding: 24px 16px 40px; }
       .ideas-grid { grid-template-columns: 1fr; }
+      .pulse-tiles { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
 </head>
@@ -448,6 +539,20 @@
   <div class="page-header">
     <h1>Content Ideas Dashboard</h1>
     <p>SEO-driven blog content for Brew Movers — powered by SEMrush keyword research + Claude AI</p>
+  </div>
+
+  <!-- Market Pulse -->
+  <div class="market-pulse">
+    <div class="pulse-header">
+      <div class="pulse-title">
+        <div class="pulse-title-dot"></div>
+        Beverage Market Pulse
+      </div>
+      <div class="pulse-meta" id="pulse-updated">Loading trend data...</div>
+    </div>
+    <div class="pulse-tiles" id="pulse-tiles">
+      <div class="pulse-loading">Fetching SEMrush trend data...</div>
+    </div>
   </div>
 
   <div class="filter-bar" id="filter-bar">
@@ -753,8 +858,71 @@
       .replace(/'/g, '&#39;');
   }
 
+  // ── Market Pulse ─────────────────────────────────────────────────────────
+
+  function sparklineSVG(volumes, direction) {
+    if (!volumes || volumes.length < 2) return '';
+    const min = Math.min(...volumes);
+    const max = Math.max(...volumes);
+    const range = max - min || 1;
+    const W = 72, H = 26, pad = 2;
+    const pts = volumes.map((v, i) => {
+      const x = pad + (i / (volumes.length - 1)) * (W - pad * 2);
+      const y = H - pad - ((v - min) / range) * (H - pad * 2);
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(' ');
+    return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" fill="none" xmlns="http://www.w3.org/2000/svg" class="pulse-sparkline ${direction}">
+      <polyline points="${pts}" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>`;
+  }
+
+  function trendArrow(direction, pct) {
+    if (direction === 'rising')   return `↑ +${pct}%`;
+    if (direction === 'declining') return `↓ ${pct}%`;
+    return `→ ${pct > 0 ? '+' : ''}${pct}%`;
+  }
+
+  function renderPulseTiles(data) {
+    const container = document.getElementById('pulse-tiles');
+    const updated   = document.getElementById('pulse-updated');
+
+    if (!data || !data.verticals || data.verticals.length === 0) {
+      container.innerHTML = '<div class="pulse-loading">No trend data available.</div>';
+      return;
+    }
+
+    const sorted = [...data.verticals].sort((a, b) => b.trendPct - a.trendPct);
+
+    container.innerHTML = sorted.map(v => `
+      <div class="pulse-tile ${v.direction}">
+        <div class="pulse-tile-name" title="${esc(v.name)}">${esc(v.name)}</div>
+        ${sparklineSVG(v.monthlyVolumes, v.direction)}
+        <div class="pulse-tile-vol">${Number(v.volume).toLocaleString()}<span style="font-size:10px;font-weight:500;color:#9ca3af;"> /mo</span></div>
+        <div class="pulse-tile-trend ${v.direction}">${trendArrow(v.direction, v.trendPct)}</div>
+      </div>`).join('');
+
+    if (data.cachedAt) {
+      const d = new Date(data.cachedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      updated.textContent = `${data.stale ? '⚠ Stale · ' : ''}Updated ${d} · refreshes every 2 weeks`;
+    }
+  }
+
+  async function loadTrends() {
+    try {
+      const res = await fetch('/api/trends');
+      if (!res.ok) throw new Error(`${res.status}`);
+      const data = await res.json();
+      renderPulseTiles(data);
+    } catch (err) {
+      document.getElementById('pulse-tiles').innerHTML =
+        `<div class="pulse-loading">Could not load trend data: ${esc(err.message)}</div>`;
+      document.getElementById('pulse-updated').textContent = '';
+    }
+  }
+
   // ── Init ──────────────────────────────────────────────────────────────────
   loadIdeas();
+  loadTrends();
 </script>
 </body>
 </html>
