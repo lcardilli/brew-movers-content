@@ -639,7 +639,7 @@
             <ul>
               <li><strong>Market volume</strong> — Monthly US search demand for each beverage category, sourced from SEMrush. Reflects the overall size and trajectory of the market.</li>
               <li><strong>Buyer intent</strong> — Logistics and distribution-specific searches within each vertical. A direct signal of brands actively sourcing fulfilment partners.</li>
-              <li><strong>Trend</strong> — Month-over-month change versus the previous calendar month, giving the most current view of momentum in each category.</li>
+              <li><strong>Trend</strong> — Year-over-year change versus the same month last year, giving a seasonally consistent view of whether each category is growing or declining.</li>
             </ul>
           </div>
         </div>
@@ -987,8 +987,12 @@
         <div class="pulse-tile-name" title="${esc(v.name)}">${esc(v.name)}</div>
         <div class="pulse-tile-vol">${Number(v.volume).toLocaleString()}<span style="font-size:10px;font-weight:500;color:#9ca3af;"> /mo</span></div>
         <div class="pulse-tile-trend ${v.direction}">${trendArrow(v.direction, v.trendPct)}</div>
-        ${v.prevVolume != null ? `<div class="pulse-tile-prev">vs ${Number(v.prevVolume).toLocaleString()} last mo</div>` : ''}
-        ${v.intentVolume != null ? `<div class="pulse-tile-intent"><div class="pulse-tile-intent-dot"></div>${Number(v.intentVolume).toLocaleString()} buyer intent</div>` : ''}
+        ${v.prevVolume != null ? `<div class="pulse-tile-prev">vs ${Number(v.prevVolume).toLocaleString()} same mo last yr</div>` : ''}
+        ${v.intentVolume != null ? (() => {
+          const rate = v.volume > 0 ? ((v.intentVolume / v.volume) * 100).toFixed(2) : null;
+          const label = `${Number(v.intentVolume).toLocaleString()} logistics searches/mo${rate !== null ? ` · ${rate}% of category` : ''}`;
+          return `<div class="pulse-tile-intent"><div class="pulse-tile-intent-dot"></div>${label}</div>`;
+        })() : ''}
       </div>`).join('');
 
     if (data.cachedAt) {
