@@ -480,29 +480,28 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    .pulse-sparkline {
-      margin-bottom: 7px;
-      display: block;
-    }
-    .pulse-sparkline.rising   { color: #22c55e; }
-    .pulse-sparkline.stable   { color: #9ca3af; }
-    .pulse-sparkline.declining{ color: #ef4444; }
     .pulse-tile-vol {
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 700;
       color: #1a1a1a;
-      margin-bottom: 3px;
+      margin-bottom: 5px;
     }
     .pulse-tile-trend {
-      font-size: 11px;
+      font-size: 11.5px;
       font-weight: 600;
       display: flex;
       align-items: center;
-      gap: 3px;
+      gap: 4px;
     }
     .pulse-tile-trend.rising   { color: #16a34a; }
     .pulse-tile-trend.stable   { color: #9ca3af; }
     .pulse-tile-trend.declining{ color: #dc2626; }
+    .pulse-tile-prev {
+      font-size: 10.5px;
+      color: #9ca3af;
+      margin-top: 3px;
+      font-weight: 400;
+    }
     .pulse-loading {
       font-size: 13px;
       color: #9ca3af;
@@ -863,24 +862,8 @@
 
   // ── Market Pulse ─────────────────────────────────────────────────────────
 
-  function sparklineSVG(volumes, direction) {
-    if (!volumes || volumes.length < 2) return '';
-    const min = Math.min(...volumes);
-    const max = Math.max(...volumes);
-    const range = max - min || 1;
-    const W = 72, H = 26, pad = 2;
-    const pts = volumes.map((v, i) => {
-      const x = pad + (i / (volumes.length - 1)) * (W - pad * 2);
-      const y = H - pad - ((v - min) / range) * (H - pad * 2);
-      return `${x.toFixed(1)},${y.toFixed(1)}`;
-    }).join(' ');
-    return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" fill="none" xmlns="http://www.w3.org/2000/svg" class="pulse-sparkline ${direction}">
-      <polyline points="${pts}" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>`;
-  }
-
   function trendArrow(direction, pct) {
-    if (direction === 'rising')   return `↑ +${pct}%`;
+    if (direction === 'rising')    return `↑ +${pct}%`;
     if (direction === 'declining') return `↓ ${pct}%`;
     return `→ ${pct > 0 ? '+' : ''}${pct}%`;
   }
@@ -899,9 +882,9 @@
     container.innerHTML = sorted.map(v => `
       <div class="pulse-tile ${v.direction}">
         <div class="pulse-tile-name" title="${esc(v.name)}">${esc(v.name)}</div>
-        ${sparklineSVG(v.monthlyVolumes, v.direction)}
         <div class="pulse-tile-vol">${Number(v.volume).toLocaleString()}<span style="font-size:10px;font-weight:500;color:#9ca3af;"> /mo</span></div>
         <div class="pulse-tile-trend ${v.direction}">${trendArrow(v.direction, v.trendPct)}</div>
+        ${v.prevVolume != null ? `<div class="pulse-tile-prev">vs ${Number(v.prevVolume).toLocaleString()} last mo</div>` : ''}
       </div>`).join('');
 
     if (data.cachedAt) {
