@@ -3,7 +3,13 @@
 const { readTrends, writeTrends } = require('../lib/storage');
 const { fetchVerticalTrends }     = require('../lib/trends');
 
-const TWO_WEEKS_MS = 14 * 24 * 60 * 60 * 1000;
+// Stale if cached in a previous calendar month (refreshes on 1st of each month)
+function isCacheStale(cachedAt) {
+  if (!cachedAt) return true;
+  const cached  = new Date(cachedAt);
+  const now     = new Date();
+  return cached.getMonth() !== now.getMonth() || cached.getFullYear() !== now.getFullYear();
+}
 
 module.exports = async (req, res) => {
   if (req.method !== 'GET') {
@@ -16,10 +22,9 @@ module.exports = async (req, res) => {
   }
 
   // Always try to read cache first
-  const force  = req.query.force === '1';
-  const cached = await readTrends();
-  const age    = cached?.cachedAt ? Date.now() - new Date(cached.cachedAt).getTime() : Infinity;
-  const isStale = age >= TWO_WEEKS_MS;
+  const force   = req.query.force === '1';
+  const cached  = await readTrends();
+  const isStale = isCacheStale(cached?.cachedAt);
 
   if (!force && !isStale && cached) {
     return res.status(200).json(cached);

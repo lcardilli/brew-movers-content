@@ -457,7 +457,7 @@
     }
     .pulse-tiles {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+      grid-template-columns: repeat(5, 1fr);
       gap: 10px;
     }
     .pulse-tile {
@@ -510,6 +510,9 @@
       padding: 16px 0;
     }
 
+    @media (max-width: 900px) {
+      .pulse-tiles { grid-template-columns: repeat(3, 1fr); }
+    }
     @media (max-width: 640px) {
       header { padding: 12px 16px; }
       main { padding: 24px 16px 40px; }
@@ -891,7 +894,7 @@
       return;
     }
 
-    const sorted = [...data.verticals].sort((a, b) => b.trendPct - a.trendPct);
+    const sorted = [...data.verticals].sort((a, b) => b.volume - a.volume);
 
     container.innerHTML = sorted.map(v => `
       <div class="pulse-tile ${v.direction}">
@@ -903,7 +906,7 @@
 
     if (data.cachedAt) {
       const d = new Date(data.cachedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-      updated.textContent = `${data.stale ? '⚠ Stale · ' : ''}Updated ${d} · refreshes every 2 weeks`;
+      updated.textContent = `${data.stale ? '⚠ Stale · ' : ''}Updated ${d} · refreshes 1st of each month`;
     }
   }
 
