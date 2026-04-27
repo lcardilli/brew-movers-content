@@ -502,24 +502,7 @@
       margin-top: 3px;
       font-weight: 400;
     }
-    .pulse-tile-intent {
-      font-size: 10.5px;
-      color: #6b7280;
-      margin-top: 6px;
-      padding-top: 6px;
-      border-top: 1px solid #f1f5f9;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .pulse-tile-intent-dot {
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
-      background: #F5A31A;
-      flex-shrink: 0;
-    }
-    .pulse-loading {
+.pulse-loading {
       font-size: 13px;
       color: #9ca3af;
       text-align: center;
@@ -635,8 +618,7 @@
             <h4>About this data</h4>
             <ul>
               <li><strong>Market volume</strong> — Monthly US search demand for each beverage category, sourced from SEMrush. Reflects the overall size and trajectory of the market.</li>
-              <li><strong>Buyer intent</strong> — Logistics and distribution-specific searches within each vertical. A direct signal of brands actively sourcing fulfilment partners.</li>
-              <li><strong>Trend</strong> — Month-over-month change based on accumulated historical snapshots. Each month a new data point is recorded, building a proprietary trend baseline over time.</li>
+              <li><strong>Trend</strong> — Month-over-month change based on snapshots recorded on the 1st of each month, building a proprietary trend baseline over time.</li>
             </ul>
           </div>
         </div>
@@ -986,12 +968,6 @@
         <div class="pulse-tile-vol">${Number(v.volume).toLocaleString()}<span style="font-size:10px;font-weight:500;color:#9ca3af;"> /mo</span></div>
         <div class="pulse-tile-trend ${v.direction}">${trendArrow(v.direction, v.trendPct)}</div>
         ${v.prevVolume != null && v.prevDate ? `<div class="pulse-tile-prev">vs ${Number(v.prevVolume).toLocaleString()} · ${new Date(v.prevDate).toLocaleDateString('en-US',{month:'short',year:'numeric'})}</div>` : ''}
-        ${(() => {
-          const iv   = v.intentVolume ?? 0;
-          const rate = v.volume > 0 ? ((iv / v.volume) * 100).toFixed(2) : '0.00';
-          const label = `${Number(iv).toLocaleString()} logistics searches/mo · ${rate}% of category`;
-          return `<div class="pulse-tile-intent"><div class="pulse-tile-intent-dot"></div>${label}</div>`;
-        })()}
       </div>`).join('');
 
     if (data.cachedAt) {
