@@ -909,7 +909,7 @@
 
   async function loadTrends() {
     try {
-      const res = await fetch('/api/trends');
+      const res = await fetch('/api/trends?force=1');
       if (!res.ok) throw new Error(`${res.status}`);
       const data = await res.json();
       renderPulseTiles(data);
