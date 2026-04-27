@@ -636,7 +636,7 @@
             <ul>
               <li><strong>Market volume</strong> — Monthly US search demand for each beverage category, sourced from SEMrush. Reflects the overall size and trajectory of the market.</li>
               <li><strong>Buyer intent</strong> — Logistics and distribution-specific searches within each vertical. A direct signal of brands actively sourcing fulfilment partners.</li>
-              <li><strong>Trend</strong> — Year-over-year change versus the same month last year, giving a seasonally consistent view of whether each category is growing or declining.</li>
+              <li><strong>Trend</strong> — Month-over-month change based on accumulated historical snapshots. Each month a new data point is recorded, building a proprietary trend baseline over time.</li>
             </ul>
           </div>
         </div>
@@ -963,6 +963,7 @@
   // ── Market Pulse ─────────────────────────────────────────────────────────
 
   function trendArrow(direction, pct) {
+    if (pct === null) return `<span style="color:#c4c9d4;">— first month</span>`;
     if (direction === 'rising')    return `↑ +${pct}%`;
     if (direction === 'declining') return `↓ ${pct}%`;
     return `→ ${pct > 0 ? '+' : ''}${pct}%`;
@@ -984,7 +985,7 @@
         <div class="pulse-tile-name" title="${esc(v.name)}">${esc(v.name)}</div>
         <div class="pulse-tile-vol">${Number(v.volume).toLocaleString()}<span style="font-size:10px;font-weight:500;color:#9ca3af;"> /mo</span></div>
         <div class="pulse-tile-trend ${v.direction}">${trendArrow(v.direction, v.trendPct)}</div>
-        ${v.prevVolume != null ? `<div class="pulse-tile-prev">vs ${Number(v.prevVolume).toLocaleString()} same mo last yr</div>` : ''}
+        ${v.prevVolume != null && v.prevDate ? `<div class="pulse-tile-prev">vs ${Number(v.prevVolume).toLocaleString()} · ${new Date(v.prevDate).toLocaleDateString('en-US',{month:'short',year:'numeric'})}</div>` : ''}
         ${v.intentVolume != null ? (() => {
           const rate = v.volume > 0 ? ((v.intentVolume / v.volume) * 100).toFixed(2) : null;
           const label = `${Number(v.intentVolume).toLocaleString()} logistics searches/mo${rate !== null ? ` · ${rate}% of category` : ''}`;
