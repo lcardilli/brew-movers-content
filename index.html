@@ -502,12 +502,95 @@
       margin-top: 3px;
       font-weight: 400;
     }
+    .pulse-tile-intent {
+      font-size: 10.5px;
+      color: #6b7280;
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px solid #f1f5f9;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .pulse-tile-intent-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #F5A31A;
+      flex-shrink: 0;
+    }
     .pulse-loading {
       font-size: 13px;
       color: #9ca3af;
       text-align: center;
       padding: 16px 0;
     }
+
+    /* ── Info tooltip ── */
+    .pulse-info-btn {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 1.5px solid #d1d5db;
+      background: #fff;
+      color: #9ca3af;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Inter', sans-serif;
+      transition: all 0.15s;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .pulse-info-btn:hover { border-color: #F5A31A; color: #F5A31A; }
+    .pulse-info-tooltip {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: 290px;
+      background: #1a2332;
+      border-radius: 10px;
+      padding: 16px;
+      z-index: 100;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+    }
+    .pulse-info-tooltip.visible { display: block; }
+    .pulse-info-tooltip::before {
+      content: '';
+      position: absolute;
+      top: -5px;
+      right: 10px;
+      width: 10px;
+      height: 10px;
+      background: #1a2332;
+      transform: rotate(45deg);
+      border-radius: 2px;
+    }
+    .pulse-info-tooltip h4 {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #F5A31A;
+      margin-bottom: 10px;
+    }
+    .pulse-info-tooltip ul {
+      list-style: none;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .pulse-info-tooltip li {
+      font-size: 12px;
+      color: #a8b0c8;
+      line-height: 1.55;
+    }
+    .pulse-info-tooltip li strong { color: #e0e4f0; font-weight: 600; }
 
     @media (max-width: 900px) {
       .pulse-tiles { grid-template-columns: repeat(3, 1fr); }
@@ -549,6 +632,17 @@
       <div class="pulse-title">
         <div class="pulse-title-dot"></div>
         Beverage Market Pulse
+        <div style="position:relative;">
+          <button class="pulse-info-btn" id="pulse-info-btn" onclick="togglePulseInfo(event)">i</button>
+          <div class="pulse-info-tooltip" id="pulse-info-tooltip">
+            <h4>About this data</h4>
+            <ul>
+              <li><strong>Market volume</strong> — Monthly US search demand for each beverage category, sourced from SEMrush. Reflects the overall size and trajectory of the market.</li>
+              <li><strong>Buyer intent</strong> — Logistics and distribution-specific searches within each vertical. A direct signal of brands actively sourcing fulfilment partners.</li>
+              <li><strong>Trend</strong> — Month-over-month change versus the previous calendar month, giving the most current view of momentum in each category.</li>
+            </ul>
+          </div>
+        </div>
       </div>
       <div class="pulse-meta" id="pulse-updated">Loading trend data...</div>
     </div>
@@ -860,6 +954,15 @@
       .replace(/'/g, '&#39;');
   }
 
+  // ── Info tooltip ─────────────────────────────────────────────────────────
+  function togglePulseInfo(e) {
+    e.stopPropagation();
+    document.getElementById('pulse-info-tooltip').classList.toggle('visible');
+  }
+  document.addEventListener('click', () => {
+    document.getElementById('pulse-info-tooltip')?.classList.remove('visible');
+  });
+
   // ── Market Pulse ─────────────────────────────────────────────────────────
 
   function trendArrow(direction, pct) {
@@ -885,6 +988,7 @@
         <div class="pulse-tile-vol">${Number(v.volume).toLocaleString()}<span style="font-size:10px;font-weight:500;color:#9ca3af;"> /mo</span></div>
         <div class="pulse-tile-trend ${v.direction}">${trendArrow(v.direction, v.trendPct)}</div>
         ${v.prevVolume != null ? `<div class="pulse-tile-prev">vs ${Number(v.prevVolume).toLocaleString()} last mo</div>` : ''}
+        ${v.intentVolume != null ? `<div class="pulse-tile-intent"><div class="pulse-tile-intent-dot"></div>${Number(v.intentVolume).toLocaleString()} buyer intent</div>` : ''}
       </div>`).join('');
 
     if (data.cachedAt) {
