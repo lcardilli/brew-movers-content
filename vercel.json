@@ -18,5 +18,13 @@
       "path": "/api/generate",
       "schedule": "0 13 1 * *"
     }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow" }
+      ]
+    }
   ]
 }
